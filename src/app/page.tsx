@@ -9,7 +9,7 @@ export default function HomePage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Redirect to subdomain landing page
-    window.location.href = `https://${country}.${zip}.yourdomain.com`;
+    window.location.href = `https://${country}.${zip}.sinkorserve.com`;
   };
 
   return (
@@ -33,7 +33,7 @@ export default function HomePage() {
           <label className="block mb-1 font-medium">Zip Code</label>
           <input
             type="text"
-            placeholder="75001"
+            placeholder="75751"
             value={zip}
             onChange={(e) => setZip(e.target.value)}
             className="w-full border rounded px-3 py-2"
