@@ -1,29 +1,69 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
 
-export default function CompanyPage({ params }) {
-  const [data, setData] = useState<any>(null);
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+
+interface CompanyData {
+  name: string;
+  country: string;
+  region: string;
+  product: string;
+  experience: string;
+}
+
+interface CompanyPageProps {
+  params: {
+    country: string;
+    region: string;
+    company: string;
+  };
+}
+
+export default function CompanyPage({ params }: CompanyPageProps) {
+  const router = useRouter();
+  const [data, setData] = useState<CompanyData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
-      const docId = `${params.country}_${params.region}_${params.company}`;
-      const docRef = doc(db, "companies", docId);
-      const snapshot = await getDoc(docRef);
+      try {
+        const { country, region, company } = params;
 
-      if (snapshot.exists()) {
-        setData(snapshot.data());
-      } else {
-        setData(null);
+        // Sanitize params
+        const sanitize = (s: string) =>
+          s.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9_-]/g, '');
+
+        const docId = `${sanitize(country)}_${sanitize(region)}_${sanitize(company)}`;
+        const docRef = doc(db, 'companies', docId);
+        const snapshot = await getDoc(docRef);
+
+        if (!snapshot.exists()) {
+          setData(null);
+        } else {
+          setData(snapshot.data() as CompanyData);
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        setError(msg);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
+
     fetchData();
   }, [params]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
+
+  if (error) return (
+    <div className="flex min-h-screen items-center justify-center text-red-600">
+      Error: {error}
+    </div>
+  );
+
   if (!data)
     return (
       <div className="flex min-h-screen items-center justify-center">
