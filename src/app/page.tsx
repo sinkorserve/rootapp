@@ -1,60 +1,29 @@
-'use client';
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
   const [country, setCountry] = useState('');
+  const [region, setRegion] = useState('');
   const [company, setCompany] = useState('');
   const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!country || !region || !company) return;
 
-    if (!country || !company) return;
+    const c = country.trim().toLowerCase();
+    const r = region.trim().toLowerCase();
+    const co = company.trim().toLowerCase().replace(/\s+/g, '-');
 
-    // normalize input (lowercase, no spaces)
-    const normalizedCountry = country.trim().toLowerCase();
-    const normalizedCompany = company.trim().toLowerCase().replace(/\s+/g, '-');
-
-    router.push(`/${normalizedCountry}/${normalizedCompany}`);
+    router.push(`/${c}/${r}/${co}`);
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded shadow-md w-full max-w-md"
-      >
-        <h1 className="text-xl font-bold mb-4">Find Your Company</h1>
-
-        <label className="block mb-2 font-medium">Country</label>
-        <input
-          type="text"
-          value={country}
-          onChange={(e) => setCountry(e.target.value)}
-          className="w-full p-2 border rounded mb-4"
-          placeholder="e.g. us"
-          required
-        />
-
-        <label className="block mb-2 font-medium">Company</label>
-        <input
-          type="text"
-          value={company}
-          onChange={(e) => setCompany(e.target.value)}
-          className="w-full p-2 border rounded mb-4"
-          placeholder="e.g. microsoft"
-          required
-        />
-
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"
-        >
-          Go
-        </button>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto p-6">
+      <input value={country} onChange={e => setCountry(e.target.value)} placeholder="Country" required />
+      <input value={region} onChange={e => setRegion(e.target.value)} placeholder="Region" required />
+      <input value={company} onChange={e => setCompany(e.target.value)} placeholder="Company" required />
+      <button type="submit">Go</button>
+    </form>
   );
 }
