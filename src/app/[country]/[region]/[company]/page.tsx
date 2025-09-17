@@ -1,37 +1,37 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-
+import { useState, useEffect } from 'react';
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
-interface CompanyPageProps {
-  params: {
-    country: string;
-    region: string;
-    company: string;
-  };
-}
+export default function CompanyPage({ params }) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-export default async function CompanyPage({ params }: CompanyPageProps) {
-  const { country, region, company } = params;
+  useEffect(() => {
+    async function fetchData() {
+      const docId = `${params.country}_${params.region}_${params.company}`;
+      const docRef = doc(db, "companies", docId);
+      const snapshot = await getDoc(docRef);
 
-  // Build Firestore document ID (e.g. us_tx_microsoft)
-  const docId = `${country}_${region}_${company}`;
-  const docRef = doc(db, "companies", docId);
-  const snapshot = await getDoc(docRef);
+      if (snapshot.exists()) {
+        setData(snapshot.data());
+      } else {
+        setData(null);
+      }
+      setLoading(false);
+    }
+    fetchData();
+  }, [params]);
 
-  if (!snapshot.exists()) {
+  if (loading) return <div>Loading...</div>;
+  if (!data)
     return (
       <div className="flex min-h-screen items-center justify-center">
         <h1 className="text-xl">
-          No data found for {company} in {region}, {country}
+          No data found for {params.company} in {params.region}, {params.country}
         </h1>
       </div>
     );
-  }
-
-  const data = snapshot.data();
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -40,7 +40,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
           {data.name} ({data.country.toUpperCase()} – {data.region.toUpperCase()})
         </h1>
         <p className="text-sm text-gray-600">
-          Product: {data.product}
+          Product: {data.product} <br />
           Experience: {data.experience}
         </p>
       </div>
