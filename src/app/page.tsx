@@ -1,48 +1,58 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
   const [country, setCountry] = useState('');
-  const [zip, setZip] = useState('');
+  const [company, setCompany] = useState('');
+  const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Redirect to subdomain landing page
-    window.location.href = `https://${country}.${zip}.sinkorserve.com`;
+
+    if (!country || !company) return;
+
+    // normalize input (lowercase, no spaces)
+    const normalizedCountry = country.trim().toLowerCase();
+    const normalizedCompany = company.trim().toLowerCase().replace(/\s+/g, '-');
+
+    router.push(`/${normalizedCountry}/${normalizedCompany}`);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form className="bg-white p-8 rounded shadow-md space-y-4 w-full max-w-md" onSubmit={handleSubmit}>
-        <h1 className="text-2xl font-bold text-center">Enter Location</h1>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded shadow-md w-full max-w-md"
+      >
+        <h1 className="text-xl font-bold mb-4">Find Your Company</h1>
 
-        <div>
-          <label className="block mb-1 font-medium">Country</label>
-          <input
-            type="text"
-            placeholder="US"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-            required
-          />
-        </div>
+        <label className="block mb-2 font-medium">Country</label>
+        <input
+          type="text"
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+          className="w-full p-2 border rounded mb-4"
+          placeholder="e.g. us"
+          required
+        />
 
-        <div>
-          <label className="block mb-1 font-medium">Zip Code</label>
-          <input
-            type="text"
-            placeholder="75751"
-            value={zip}
-            onChange={(e) => setZip(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-            required
-          />
-        </div>
+        <label className="block mb-2 font-medium">Company</label>
+        <input
+          type="text"
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
+          className="w-full p-2 border rounded mb-4"
+          placeholder="e.g. microsoft"
+          required
+        />
 
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-          Continue
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"
+        >
+          Go
         </button>
       </form>
     </div>
