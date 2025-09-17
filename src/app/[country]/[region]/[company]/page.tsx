@@ -1,3 +1,7 @@
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
