@@ -1,17 +1,14 @@
-// src/app/api/test-firebase/route.ts
 import { NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { dbAdmin } from "@/lib/firebaseAdmin";
 
 export async function GET() {
   try {
-    const snapshot = await getDocs(collection(db, "test"));
-    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return NextResponse.json({ success: true, data });
-  } catch (err: unknown) {
-    return NextResponse.json({
-      success: false,
-      error: err instanceof Error ? err.message : "Unknown error",
-    });
+    const snapshot = await dbAdmin.collection("companies").get();
+    const companies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    return NextResponse.json({ success: true, data: companies });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
