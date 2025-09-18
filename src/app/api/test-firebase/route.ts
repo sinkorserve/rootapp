@@ -5,7 +5,7 @@ import { collection, getDocs } from "firebase/firestore";
 
 export async function GET() {
   try {
-    const snapshot = await getDocs(collection(db, "companies"));
+    const snapshot = await getDocs(collection(db, "test"));
     const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     return NextResponse.json({ success: true, data });
   } catch (err: unknown) {
