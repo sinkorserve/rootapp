@@ -21,7 +21,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
   try {
     const docRef = admin.firestore().collection("companies").doc(docId);
     const snapshot = await docRef.get();
-
+    console.log("Snapshot:", snapshot);
     if (!snapshot.exists) {
       console.warn(`Document not found: ${docId}`);
       return (
