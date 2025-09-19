@@ -9,8 +9,12 @@ interface CompanyPageProps {
 }
 
 export default async function CompanyPage({ params }: CompanyPageProps) {
+
+  console.log("params:", params);
   const { country, region, company } = params;
   const docId = `${country}_${region}_${company}`;
+
+  console.log("Looking for doc ID:", docId);
   const db = admin.firestore();
 
   // First, check if the document exists
