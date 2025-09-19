@@ -1,5 +1,6 @@
 // src/app/[country]/[region]/[company]/page.tsx
 import { admin } from "@/lib/firebaseAdmin"; // make sure this points to your Admin SDK
+import { stringify } from "querystring";
 import React from "react";
 
 interface CompanyPageProps {
@@ -21,7 +22,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
   try {
     const docRef = admin.firestore().collection("companies").doc(docId);
     const snapshot = await docRef.get();
-    console.log("Snapshot:", snapshot);
+    console.log("Snapshot:", JSON.stringify(snapshot));
     if (!snapshot.exists) {
       console.warn(`Document not found: ${docId}`);
       return (
