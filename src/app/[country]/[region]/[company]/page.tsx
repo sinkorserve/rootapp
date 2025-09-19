@@ -1,4 +1,6 @@
-import { admin } from "@/lib/firebaseAdmin";
+// src/app/[country]/[region]/[company]/page.tsx
+import { admin } from "@/lib/firebaseAdmin"; // make sure this points to your Admin SDK
+import React from "react";
 
 interface CompanyPageProps {
   params: {
@@ -9,53 +11,53 @@ interface CompanyPageProps {
 }
 
 export default async function CompanyPage({ params }: CompanyPageProps) {
-
-  console.log("params:", params);
   const { country, region, company } = params;
+
+  // Construct Firestore document ID
   const docId = `${country}_${region}_${company}`;
-
+  console.log("Params received:", params);
   console.log("Looking for doc ID:", docId);
-  const db = admin.firestore();
 
-  // First, check if the document exists
-  const docRef = db.collection("companies").doc(docId);
-  const snapshot = await docRef.get();
+  try {
+    const docRef = admin.firestore().collection("companies").doc(docId);
+    const snapshot = await docRef.get();
 
-  if (!snapshot.exists) {
-    // Document not found → show friendly message
+    if (!snapshot.exists) {
+      console.warn(`Document not found: ${docId}`);
+      return (
+        <div className="flex min-h-screen items-center justify-center">
+          <h1 className="text-xl">
+            No data found for {company} in {region}, {country}
+          </h1>
+        </div>
+      );
+    }
+
+    const data = snapshot.data();
+    console.log("Document data:", data);
+
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <div className="bg-white p-6 rounded shadow-md max-w-lg text-center">
-          <h1 className="text-2xl font-bold mb-4">Company Not Found</h1>
-          <p className="text-gray-700">
-            No data found for <strong>{company}</strong> in {region}, {country}.
+        <div className="bg-white p-6 rounded shadow-md max-w-lg">
+          <h1 className="text-2xl font-bold mb-4">
+            {data?.name} ({data?.country?.toUpperCase()} – {data?.region?.toUpperCase()})
+          </h1>
+          <p className="text-sm text-gray-600">
+            Product: {data?.product}
+            <br />
+            Experience: {data?.experience}
           </p>
         </div>
       </div>
     );
-  }
-
-  const data = snapshot.data() as {
-    name: string;
-    country: string;
-    region: string;
-    product?: string;
-    experience?: string;
-  };
-
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="bg-white p-6 rounded shadow-md max-w-lg">
-        <h1 className="text-2xl font-bold mb-4">
-          {data.name} ({data.country.toUpperCase()} – {data.region.toUpperCase()})
+  } catch (error: unknown) {
+    console.error("Error fetching document:", error);
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <h1 className="text-xl text-red-600">
+          Error fetching data. Check server logs.
         </h1>
-        <p className="text-sm text-gray-600 mb-2">
-          <strong>Product:</strong> {data.product ?? "N/A"}
-        </p>
-        <p className="text-sm text-gray-600">
-          <strong>Experience:</strong> {data.experience ?? "N/A"}
-        </p>
       </div>
-    </div>
-  );
+    );
+  }
 }
