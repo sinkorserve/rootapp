@@ -13,7 +13,9 @@ export async function GET() {
 
     const companies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     return NextResponse.json({ success: true, data: companies });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ success: false, error: message });
   }
 }
+
