@@ -5,7 +5,7 @@ const db = admin.firestore();
 
 export async function GET() {
   try {
-    const snapshot = await db.collection("companies").get();
+    const snapshot = await db.collection("test").get();
 
     if (snapshot.empty) {
       return NextResponse.json({ success: false, error: "No documents found in companies collection" });
