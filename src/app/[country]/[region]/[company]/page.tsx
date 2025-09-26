@@ -1,63 +1,43 @@
-// src/app/[country]/[region]/[company]/page.tsx
-import { admin } from "@/lib/firebaseAdmin"; // make sure this points to your Admin SDK
-import { stringify } from "querystring";
-import React from "react";
+import { db } from "@/lib/firebaseAdmin";
+import { notFound } from "next/navigation";
 
 interface CompanyPageProps {
   params: {
     country: string;
-    region: string;
     company: string;
   };
 }
 
 export default async function CompanyPage({ params }: CompanyPageProps) {
-  const { country, region, company } = params;
-
-  // Construct Firestore document ID
-  const docId = `${country}_${region}_${company}`;
-  console.log("Params received:", params);
-  console.log("Looking for doc ID:", docId);
+  const { country, company } = params;
+  const docId = `${country}_${company}`;
 
   try {
-    const docRef = admin.firestore().collection("companies").doc(docId);
+    const docRef = db.collection("companies").doc(docId);
     const snapshot = await docRef.get();
-    console.log("Snapshot:", JSON.stringify(snapshot));
+
     if (!snapshot.exists) {
-      console.warn(`Document not found: ${docId}`);
-      return (
-        <div className="flex min-h-screen items-center justify-center">
-          <h1 className="text-xl">
-            No data found for {company} in {region}, {country}
-          </h1>
-        </div>
-      );
+      notFound();
     }
 
     const data = snapshot.data();
-    console.log("Document data:", data);
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-6 rounded shadow-md max-w-lg">
-          <h1 className="text-2xl font-bold mb-4">
-            {data?.name} ({data?.country?.toUpperCase()} – {data?.region?.toUpperCase()})
-          </h1>
-          <p className="text-sm text-gray-600">
-            Product: {data?.product}
-            <br />
+          <h1 className="text-2xl font-bold mb-4">{data?.name}</h1>
+          <p className="text-gray-600">
+            Country: {data?.country} <br />
+            Product: {data?.product} <br />
             Experience: {data?.experience}
           </p>
         </div>
       </div>
     );
-  } catch (error: unknown) {
-    console.error("Error fetching document:", error);
+  } catch (err) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <h1 className="text-xl text-red-600">
-          Error fetching data. Check server logs.
-        </h1>
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Error fetching company data</p>
       </div>
     );
   }

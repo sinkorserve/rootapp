@@ -1,21 +1,42 @@
 import { NextResponse } from "next/server";
-import { admin } from "@/lib/firebaseAdmin";
-
-const db = admin.firestore();
+import { db } from "@/lib/firebaseAdmin";
 
 export async function GET() {
   try {
-    const snapshot = await db.collection("companies").get();
+    console.log("Listing root collections...");
 
-    if (snapshot.empty) {
-      return NextResponse.json({ success: false, error: "No documents found in companies collection" });
+    const collections = await db.listCollections();
+    const collectionNames = collections.map((col) => col.id);
+
+    console.log("Found collections:", collectionNames);
+
+    // If companies exists, fetch docs
+    if (collectionNames.includes("companies")) {
+      const snapshot = await db.collection("companies").get();
+
+      if (snapshot.empty) {
+        return NextResponse.json({
+          success: false,
+          error: "Companies collection is empty",
+        });
+      }
+
+      const companies = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return NextResponse.json({ success: true, data: companies });
     }
 
-    const companies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return NextResponse.json({ success: true, data: companies });
+    return NextResponse.json({
+      success: false,
+      error: "No 'companies' collection found",
+      collections: collectionNames,
+    });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ success: false, error: message });
+    console.error("Error fetching companies:", message);
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
-
